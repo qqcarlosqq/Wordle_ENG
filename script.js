@@ -1,4 +1,4 @@
-//* Wordle Solver — English (v3 – memo-cache de entropía) */
+/* Wordle Solver — English (v3 – memo-cache de entropía) */
 const LETTERS = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ'.split('');
 let dictionary = DICTIONARY.slice();
 
