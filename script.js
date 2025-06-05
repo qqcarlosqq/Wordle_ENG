@@ -140,7 +140,9 @@ function computeH(word){
     const p = count / n;
     sumP2 += p*p;
   });
-  return 1 / sumP2;     // maximum == n when every pattern unique
+  /return 1 / sumP2;     // maximum == n when every pattern unique
+  return n - (Array.from(counts.values())
+                .reduce((s,c)=> s + c*c, 0) / n);
 }
 
 // fast heuristic used only when >800 candidates
