@@ -10,8 +10,8 @@
 <h1>Wordle Solver — English</h1>
 
 <div id="tabs">
-    <button id="tabSolver" class="active">Solve Wordle</button>
-    <button id="tabFinder">Find words</button>
+  <button id="tabSolver" class="active">Solve Wordle</button>
+  <button id="tabFinder">Find words</button>
 </div>
 
 <!-- Solver Panel -->
@@ -28,14 +28,22 @@
 
   <pre id="history"></pre>
 
-  <h3>Candidates (<span id="candCount">0</span>)</h3>
-  <table id="tblCands"><thead><tr><th>Word</th><th>H</th></tr></thead><tbody></tbody></table>
+  <div class="mainTables">
+    <div>
+      <h3>Candidates (<span id="candCount">0</span>)</h3>
+      <table id="tblCands"><thead><tr><th>Word</th><th>H</th></tr></thead><tbody></tbody></table>
+    </div>
 
-  <h3>Best discard</h3>
-  <table id="tblDiscard"><thead><tr><th>Word</th><th>H</th></tr></thead><tbody></tbody></table>
+    <div>
+      <h3>Best discard</h3>
+      <table id="tblDiscard"><thead><tr><th>Word</th><th>H</th></tr></thead><tbody></tbody></table>
+    </div>
 
-  <h3>Green repetition</h3>
-  <table id="tblGreen"><thead><tr><th>Word</th><th>H</th></tr></thead><tbody></tbody></table>
+    <div>
+      <h3>Green repetition</h3>
+      <table id="tblGreen"><thead><tr><th>Word</th><th>H</th></tr></thead><tbody></tbody></table>
+    </div>
+  </div>
 
   <h3>Letter frequencies</h3>
   <table id="tblFreq"><thead><tr><th>Letter</th><th># appearances</th><th># words</th><th># repeated</th></tr></thead><tbody></tbody></table>
