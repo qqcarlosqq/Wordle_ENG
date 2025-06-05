@@ -1,316 +1,230 @@
 
-/* Wordle Solver English version – enhanced parity with ES */
+/* Wordle Solver English version – EntropiaExacta */
 const LETTERS = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ'.split('');
-let dictionary = DICTIONARY.slice();              // from diccionario_en.js
-let history   = [];                               // guessed words
-let patterns  = [];                               // colour pattern per guess (array of arrays of 0/1/2)
-let candidates = dictionary.slice();              // words still possible
+let dictionary = DICTIONARY.slice();
+let history = [];
+let patterns = [];
+let candidates = dictionary.slice();
 
-/* ---------- UI initialisation ---------- */
+/* ------------ UI Setup ------------ */
 function init() {
   buildColorSelectors();
   document.getElementById('saveGuess').onclick = saveGuess;
   document.getElementById('reset').onclick = resetAll;
   document.getElementById('suggest').onclick = suggestWords;
   document.getElementById('findBtn').onclick = buscarPalabrasUsuario;
-
-  // tab switching
   document.getElementById('tabSolver').onclick = () => showTab('solver');
   document.getElementById('tabFinder').onclick = () => showTab('finder');
   showTab('solver');
-
   renderFreqTable();
   updateCandidates();
 }
 
 function showTab(which){
-  const solver = document.getElementById('panelSolver');
-  const finder = document.getElementById('panelFinder');
+  const solver=document.getElementById('panelSolver');
+  const finder=document.getElementById('panelFinder');
   if(which==='solver'){
-     solver.hidden=false; finder.hidden=true;
-     document.getElementById('tabSolver').classList.add('active');
-     document.getElementById('tabFinder').classList.remove('active');
-  } else {
-     solver.hidden=true; finder.hidden=false;
-     document.getElementById('tabFinder').classList.add('active');
-     document.getElementById('tabSolver').classList.remove('active');
+    solver.hidden=false; finder.hidden=true;
+    document.getElementById('tabSolver').classList.add('active');
+    document.getElementById('tabFinder').classList.remove('active');
+  }else{
+    solver.hidden=true; finder.hidden=false;
+    document.getElementById('tabFinder').classList.add('active');
+    document.getElementById('tabSolver').classList.remove('active');
   }
 }
 
-/* ---------- Build colour dropdowns ---------- */
+/* ------------ Colour selectors ------------ */
 function buildColorSelectors(){
-  const container = document.getElementById('colorSelects');
-  container.innerHTML='';
+  const cont=document.getElementById('colorSelects');
+  cont.innerHTML='';
   for(let i=0;i<5;i++){
     const sel=document.createElement('select');
-    ['Gray','Yellow','Green'].forEach((c,idx)=>{
-      const opt=document.createElement('option');
-      opt.value=idx; opt.textContent=c;
-      sel.appendChild(opt);
+    ['Gray','Yellow','Green'].forEach((txt,val)=>{
+       const opt=document.createElement('option');
+       opt.value=val; opt.textContent=txt; sel.appendChild(opt);
     });
-    container.appendChild(sel);
+    cont.appendChild(sel);
   }
 }
 
-/* ---------- Handle guesses ---------- */
+/* ------------ Guess handling ------------ */
 function saveGuess(){
-  const wordInput = document.getElementById('wordInput');
-  const word = wordInput.value.trim().toUpperCase();
-  if(word.length!==5 || !/^[A-Z]{5}$/.test(word)){ alert('Enter 5 letters (A‑Z)'); return;}
-
-  const pattern = [...document.getElementById('colorSelects').children]
-                  .map(sel=>parseInt(sel.value)); // 0 gray / 1 yellow / 2 green
-
-  history.push(word);
-  patterns.push(pattern);
-
-  wordInput.value='';
+  const inp=document.getElementById('wordInput');
+  const word=inp.value.trim().toUpperCase();
+  if(!/^[A-Z]{5}$/.test(word)){ alert('Enter 5 letters (A‑Z)'); return;}
+  const pattern=[...document.getElementById('colorSelects').children].map(s=>+s.value);
+  history.push(word); patterns.push(pattern);
+  inp.value='';
   updateHistory();
   updateCandidates();
 }
+function resetAll(){ history=[]; patterns=[]; candidates=dictionary.slice(); updateHistory(); updateCandidates(); }
+function updateHistory(){ document.getElementById('history').textContent=history.join('\n'); }
 
-function resetAll(){
-  history=[]; patterns=[]; candidates=dictionary.slice();
-  updateHistory();
-  updateCandidates();
-}
-
-function updateHistory(){
-  document.getElementById('history').textContent = history.join('\n');
-}
-
-/* ---------- Pattern helpers ---------- */
-// return array[5] with numbers 0/1/2 (gray / yellow / green)
+/* ------------ Pattern helpers ------------ */
 function patternFromWords(secret, guess){
-  const res = Array(5).fill(0);
-  const secretArr = secret.split('');
-  const guessArr  = guess.split('');
-
-  /* first pass – greens */
+  const res=Array(5).fill(0);
+  const sArr=secret.split(''); const gArr=guess.split('');
   for(let i=0;i<5;i++){
-    if(guessArr[i]===secretArr[i]){
-      res[i]=2;
-      secretArr[i]=null;  // consume
-      guessArr[i]=null;
-    }
+    if(gArr[i]===sArr[i]){ res[i]=2; sArr[i]=null; gArr[i]=null;}
   }
-  /* second pass – yellows */
   for(let i=0;i<5;i++){
-    if(guessArr[i]){
-      const idx = secretArr.indexOf(guessArr[i]);
-      if(idx!==-1){
-        res[i]=1;
-        secretArr[idx]=null;
-      }
+    if(gArr[i]){
+      const idx=sArr.indexOf(gArr[i]);
+      if(idx!==-1){ res[i]=1; sArr[idx]=null; }
     }
   }
   return res;
 }
+function patternKey(secret, guess){ return patternFromWords(secret,guess).join(''); }
 
-// pattern key serialised as string "02110" for map keys
-function patternKey(secret, guess){
-  return patternFromWords(secret, guess).join('');
-}
-
-/* ---------- Candidate filtering ---------- */
+/* ------------ Candidate update ------------ */
 function updateCandidates(){
-  candidates = dictionary.filter(word=>{
-    for(let g=0; g<history.length; g++){
-      if(patternKey(word, history[g]) !== patterns[g].join('')) return false;
+  candidates=dictionary.filter(w=>{
+    for(let g=0;g<history.length;g++){
+      if(patternKey(w,history[g])!==patterns[g].join('')) return false;
     }
     return true;
   });
-
-  document.getElementById('candCount').textContent = candidates.length.toString();
+  document.getElementById('candCount').textContent=candidates.length;
   renderCandidateTable();
   renderFreqTable();
 }
 
-/* ---------- Scoring (H) ---------- */
+/* ------------ EntropiaExacta ------------ */
 function computeH(word){
-  const n = candidates.length;
+  const n=candidates.length;
   if(n===0) return 0;
-  const counts = new Map();
+  const counts=new Map();
   for(const secret of candidates){
-    const key = patternKey(secret, word);
-    counts.set(key, (counts.get(key)||0)+1);
+    const k=patternKey(secret,word);
+    counts.set(k,(counts.get(k)||0)+1);
   }
-  let sumP2 = 0;
-  counts.forEach(count=>{
-    const p = count / n;
-    sumP2 += p*p;
-  });
-  /return 1 / sumP2;     // maximum == n when every pattern unique
-  return n - (Array.from(counts.values()).reduce((s,c)=> s + c*c, 0) / n);
+  const sumSq=[...counts.values()].reduce((s,c)=>s+c*c,0);
+  return n - sumSq/n;   // Exact entropy (expected remaining words)
 }
 
-// fast heuristic used only when >800 candidates
+/* Fast heuristic for >800 candidates */
 function scoreRapido(word){
-  const seen = new Set(word);
-  let score = 0;
-  for(const l of seen){
-    let freq = 0;
+  const uniq=[...new Set(word)];
+  let score=0;
+  for(const l of uniq){
+    let freq=0;
     for(const w of candidates) if(w.includes(l)) freq++;
-    score += (freq?1/freq:0);
+    score+= (freq?1/freq:0);
   }
   return score;
 }
 
-/* ---------- Render candidate & suggestion tables ---------- */
+/* ------------ Rendering tables ------------ */
 function renderCandidateTable(){
   const tbody=document.querySelector('#tblCands tbody');
   tbody.innerHTML='';
-  const list = candidates.slice();
-  const n = candidates.length;
-  if(n<=800){
-    list.sort((a,b)=> computeH(b)-computeH(a));
-  }
+  const list=candidates.slice();
+  if(list.length<=800) list.sort((a,b)=>computeH(b)-computeH(a));
+  else list.sort();
   list.slice(0,500).forEach(w=>{
-    const tr=document.createElement('tr');
-    const hVal = (n<=800 ? computeH(w).toFixed(2) : '');
-    tr.innerHTML = `<td>${w}</td><td>${hVal}</td>`;
-    tbody.appendChild(tr);
+     const h=list.length<=800 ? computeH(w).toFixed(2) : '';
+     const tr=document.createElement('tr');
+     tr.innerHTML=`<td>${w}</td><td>${h}</td>`;
+     tbody.appendChild(tr);
   });
 }
 
-/* Suggest discard words (dictionary-wide) */
 function suggestWords(){
-  const baseList = dictionary.slice();
-  const n = candidates.length;
-  let list;
-
-  if(n>800){
-    list = baseList.sort((a,b)=> scoreRapido(b)-scoreRapido(a));
-  }else{
-    list = baseList.sort((a,b)=> computeH(b)-computeH(a));
-  }
-
+  const base=dictionary.slice();
+  const list = (candidates.length>800)
+      ? base.sort((a,b)=>scoreRapido(b)-scoreRapido(a))
+      : base.sort((a,b)=>computeH(b)-computeH(a));
   renderDiscardTable(list.slice(0,20));
-  renderGreenTable(n>0 ? getGreenRepetition(list) : []);
+  renderGreenTable(getGreenRepetition(list));
 }
 
 function renderDiscardTable(words){
   const tbody=document.querySelector('#tblDiscard tbody');
   tbody.innerHTML='';
-  for(const w of words){
-    const h = computeH(w).toFixed(3);
+  words.forEach(w=>{
+    const h=computeH(w).toFixed(3);
     const tr=document.createElement('tr');
-    tr.innerHTML = `<td>${w}</td><td>${h}</td>`;
+    tr.innerHTML=`<td>${w}</td><td>${h}</td>`;
     tbody.appendChild(tr);
-  }
+  });
 }
 
-/* ---------- Green repetition ---------- */
-// discard words that keep confirmed green letters in place
+/* Green repetition */
 function getGreenPattern(){
-  const greens = Array(5).fill(null);
-  for(const idx in patterns){
-    for(let i=0;i<5;i++){
-      if(patterns[idx][i]===2) greens[i] = history[idx][i];
-    }
-  }
-  return greens; // array with letters or null
+  const greens=Array(5).fill(null);
+  patterns.forEach((p,idx)=>{
+    for(let i=0;i<5;i++) if(p[i]===2) greens[i]=history[idx][i];
+  });
+  return greens;
 }
-
-function wordMatchesGreens(word, greens){
-  for(let i=0;i<5;i++){
-    if(greens[i] && word[i]!==greens[i]) return false;
-  }
-  return true;
+function wordMatchesGreens(w,g){ for(let i=0;i<5;i++) if(g[i]&&w[i]!==g[i]) return false; return true; }
+function getGreenRepetition(list){
+  const g=getGreenPattern();
+  if(g.every(x=>!x)) return [];
+  return list.filter(w=>wordMatchesGreens(w,g))
+             .sort((a,b)=>computeH(b)-computeH(a))
+             .slice(0,20);
 }
-
-function getGreenRepetition(wordList){
-  const greens = getGreenPattern();
-  if(greens.every(g=>!g)) return []; // no greens yet
-  return wordList.filter(w=> wordMatchesGreens(w, greens))
-                 .sort((a,b)=> computeH(b)-computeH(a))
-                 .slice(0,20);
-}
-
 function renderGreenTable(words){
-  const tbody=document.querySelector('#tblGreen tbody');
-  tbody.innerHTML='';
-  for(const w of words){
-    const h = computeH(w).toFixed(3);
+  const tbody=document.querySelector('#tblGreen tbody'); tbody.innerHTML='';
+  words.forEach(w=>{
     const tr=document.createElement('tr');
-    tr.innerHTML = `<td>${w}</td><td>${h}</td>`;
+    tr.innerHTML=`<td>${w}</td><td>${computeH(w).toFixed(3)}</td>`;
     tbody.appendChild(tr);
-  }
+  });
 }
 
-/* ---------- Letter frequencies ---------- */
+/* ------------ Letter frequencies ------------ */
 function renderFreqTable(){
-  const totals = LETTERS.map(l=>({letter:l, appearances:0, words:0, repeated:0}));
-  const n = candidates.length;
-  for(const w of candidates){
-    const seen = {};
-    for(const ch of w){
-      const obj = totals[LETTERS.indexOf(ch)];
-      obj.appearances++;
-      if(!seen[ch]){
-        obj.words++;
-        seen[ch]=true;
-      }else{
-        obj.repeated++;
-      }
-    }
-  }
-  // order by #words descending
-  totals.sort((a,b)=> b.words - a.words);
-
-  const tbody=document.querySelector('#tblFreq tbody');
-  tbody.innerHTML='';
-  for(const t of totals){
+  const rows=LETTERS.map(l=>({l,app:0,words:0,rep:0}));
+  candidates.forEach(w=>{
+     const seen={};
+     for(const ch of w){
+       const r=rows[LETTERS.indexOf(ch)];
+       r.app++;
+       if(seen[ch]) r.rep++; else { seen[ch]=1; r.words++; }
+     }
+  });
+  rows.sort((a,b)=>b.words-a.words);
+  const tbody=document.querySelector('#tblFreq tbody'); tbody.innerHTML='';
+  rows.forEach(r=>{
     const tr=document.createElement('tr');
-    tr.innerHTML = `<td>${t.letter}</td><td>${t.appearances}</td><td>${t.words}</td><td>${t.repeated}</td>`;
+    tr.innerHTML=`<td>${r.l}</td><td>${r.app}</td><td>${r.words}</td><td>${r.rep}</td>`;
     tbody.appendChild(tr);
-  }
+  });
 }
 
-/* ---------- Word finder (Buscar palabras) ---------- */
+/* ------------ Word finder ------------ */
 function buscarPalabrasUsuario(){
-  const input = document.getElementById('lettersInput').value.toUpperCase().replace(/[^A-Z]/g,'');
-  if(!input){ alert('Enter letters'); return;}
-  const letters=[...new Set(input.split(''))]; // unique letters
-  if(letters.length===0 || letters.length>5){ alert('Enter 1–5 letters'); return;}
-
-  let results = {};
+  const txt=document.getElementById('lettersInput').value.toUpperCase().replace(/[^A-Z]/g,'');
+  if(!txt){ alert('Enter letters'); return;}
+  const letters=[...new Set(txt.split(''))];
+  if(letters.length===0||letters.length>5){ alert('Enter 1–5 letters'); return;}
+  let res={};
   for(let omit=0; omit<=letters.length; omit++){
-    const combos = kCombinations(letters, letters.length - omit);
-    for(const combo of combos){
-      const hits = dictionary.filter(w=> combo.every(l=> w.includes(l)));
-      if(hits.length){
-         results[combo.join('')] = hits;
-      }
+    const combos=kComb(letters,letters.length-omit);
+    for(const c of combos){
+      const hits=dictionary.filter(w=>c.every(l=>w.includes(l)));
+      if(hits.length) res[c.join('')]=hits;
     }
-    if(Object.keys(results).length) break; // stop at first success level
+    if(Object.keys(res).length) break;
   }
-  displayFinderResults(results);
+  displayFinderResults(res);
 }
-
-function kCombinations(set, k){
-  const out=[];
-  const backtrack=(start,arr)=>{
-    if(arr.length===k){ out.push(arr.slice()); return;}
-    for(let i=start;i<set.length;i++){
-      arr.push(set[i]);
-      backtrack(i+1, arr);
-      arr.pop();
-    }
-  };
-  backtrack(0, []);
-  return out;
+function kComb(set,k){
+  const out=[]; const bt=(s,acc)=>{
+    if(acc.length===k){ out.push(acc.slice()); return;}
+    for(let i=s;i<set.length;i++){ acc.push(set[i]); bt(i+1,acc); acc.pop();}
+  }; bt(0,[]); return out;
 }
-
 function displayFinderResults(res){
-  const div = document.getElementById('finderResults');
+  const div=document.getElementById('finderResults');
   if(!Object.keys(res).length){ div.textContent='No words found'; return;}
-  let html='';
-  for(const combo in res){
-    html += `<h4>Using letters ${combo} (${res[combo].length} words)</h4>`;
-    html += '<pre>'+ res[combo].join(', ') +'</pre>';
-  }
-  div.innerHTML = html;
+  let html=''; for(const c in res){ html+=`<h4>Using ${c} (${res[c].length})</h4><pre>${res[c].join(', ')}</pre>`;}
+  div.innerHTML=html;
 }
 
-document.addEventListener('DOMContentLoaded', init);
+document.addEventListener('DOMContentLoaded',init);
