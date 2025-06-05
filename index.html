@@ -12,6 +12,7 @@
 <div id="tabs">
   <button id="tabSolver" class="active">Solve Wordle</button>
   <button id="tabFinder">Find words</button>
+  <button id="tabCompare" disabled>Compare (≤25)</button>
 </div>
 
 <!-- Solver Panel -->
@@ -54,6 +55,17 @@
   <label>Letters to use (1‑5): <input id="lettersInput" autocomplete="off" maxlength="5"></label>
   <button id="findBtn">Find</button>
   <div id="finderResults"></div>
+</section>
+  
+<!-- compare panel -->
+<section id="panelCompare" hidden>
+  <p>
+    Extra guesses (optional, max 2, comma-separated):<br>
+    <input id="extraInput" style="width:300px">
+    <button id="runCompare">Run comparison</button>
+  </p>
+
+  <div id="compareArea" style="overflow:auto"></div>
 </section>
 
 <script src="diccionario_en.js"></script>
