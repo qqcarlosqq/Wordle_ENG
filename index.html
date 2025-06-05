@@ -1,0 +1,54 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Wordle Solver — English</title>
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+<h1>Wordle Solver — English</h1>
+
+<div id="tabs">
+    <button id="tabSolver" class="active">Solve Wordle</button>
+    <button id="tabFinder">Find words</button>
+</div>
+
+<!-- Solver Panel -->
+<section id="panelSolver">
+  <label>Enter a 5‑letter word:
+    <input id="wordInput" maxlength="5" autocomplete="off">
+  </label>
+  <button id="saveGuess">Save guess</button>
+  <button id="reset">Reset</button>
+  <button id="suggest">Suggest guesses</button>
+
+  <p>Colours (gray / yellow / green):</p>
+  <div id="colorSelects"></div>
+
+  <pre id="history"></pre>
+
+  <h3>Candidates (<span id="candCount">0</span>)</h3>
+  <table id="tblCands"><thead><tr><th>Word</th><th>H</th></tr></thead><tbody></tbody></table>
+
+  <h3>Best discard</h3>
+  <table id="tblDiscard"><thead><tr><th>Word</th><th>H</th></tr></thead><tbody></tbody></table>
+
+  <h3>Green repetition</h3>
+  <table id="tblGreen"><thead><tr><th>Word</th><th>H</th></tr></thead><tbody></tbody></table>
+
+  <h3>Letter frequencies</h3>
+  <table id="tblFreq"><thead><tr><th>Letter</th><th># appearances</th><th># words</th><th># repeated</th></tr></thead><tbody></tbody></table>
+</section>
+
+<!-- Finder Panel -->
+<section id="panelFinder" hidden>
+  <label>Letters to use (1‑5): <input id="lettersInput" autocomplete="off" maxlength="5"></label>
+  <button id="findBtn">Find</button>
+  <div id="finderResults"></div>
+</section>
+
+<script src="diccionario_en.js"></script>
+<script src="script.js"></script>
+</body>
+</html>
