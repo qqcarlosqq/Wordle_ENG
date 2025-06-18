@@ -1,5 +1,4 @@
-
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html lang="en">
 <head>
 <meta charset="UTF-8">
@@ -10,14 +9,15 @@
 <h1>Wordle Solver — English</h1>
 
 <div id="tabs">
-  <button id="tabSolver" class="active">Solve Wordle</button>
+  <button id="tabSolver"  class="active">Solve Wordle</button>
   <button id="tabFinder">Find words</button>
-  <button id="tabCompare" disabled>Compare (≤25)</button>
+  <!-- botón compare ahora admite hasta 100 candidatas -->
+  <button id="tabCompare" disabled>Compare (≤100)</button>
 </div>
 
-<!-- Solver Panel -->
+<!-- --- Solver panel --- -->
 <section id="panelSolver">
-  <label>Enter a 5‑letter word:
+  <label>Enter a 5-letter word:
     <input id="wordInput" maxlength="5" autocomplete="off">
   </label>
   <button id="saveGuess">Save guess</button>
@@ -50,18 +50,22 @@
   <table id="tblFreq"><thead><tr><th>Letter</th><th># appearances</th><th># words</th><th># repeated</th></tr></thead><tbody></tbody></table>
 </section>
 
-<!-- Finder Panel -->
+<!-- --- Finder panel --- -->
 <section id="panelFinder" hidden>
-  <label>Letters to use (1‑5): <input id="lettersInput" autocomplete="off" maxlength="5"></label>
+  <!-- ahora admite hasta 10 letras -->
+  <label>Letters to use (1-10):
+    <input id="lettersInput" maxlength="10" autocomplete="off">
+  </label>
   <button id="findBtn">Find</button>
   <div id="finderResults"></div>
 </section>
-  
-<!-- compare panel -->
+
+<!-- --- Compare panel --- -->
 <section id="panelCompare" hidden>
   <p>
     Extra guesses (optional, max 2, comma-separated):<br>
     <input id="extraInput" style="width:300px">
+    <!-- mismo id que antes; la lógica se amplía en JS -->
     <button id="runCompare">Run comparison</button>
   </p>
 
